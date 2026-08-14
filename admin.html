@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Aman Car Wash - Admin</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f3f4f6;
+      color: #111827;
+    }
+
+    header {
+      background: #111827;
+      color: white;
+      padding: 18px 6%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .logout {
+      background: #ef4444;
+      color: white;
+      border: 0;
+      padding: 10px 15px;
+      border-radius: 7px;
+      cursor: pointer;
+    }
+
+    .login {
+      max-width: 400px;
+      margin: 80px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0,0,0,.1);
+    }
+
+    .login h2 {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px;
+      margin: 8px 0 15px;
+      border: 1px solid #d1d5db;
+      border-radius: 7px;
+      font-size: 16px;
+    }
+
+    .login button {
+      width: 100%;
+      padding: 13px;
+      background: #2563eb;
+      color: white;
+      border: 0;
+      border-radius: 7px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .dashboard {
+      padding: 30px 6%;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin: 25px 0;
+    }
+
+    .stat {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 3px 12px rgba(0,0,0,.07);
+    }
+
+    .stat h3 {
+      font-size: 30px;
+      color: #2563eb;
+    }
+
+    .bookings {
+      display: grid;
+      gap: 15px;
+    }
+
+    .booking {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 12px rgba(0,0,0,.07);
+    }
+
+    .booking h3 {
+      margin-bottom: 10px;
+    }
+
+    .booking p {
+      margin: 6px 0;
+    }
+
+    .status {
+      font-weight: bold;
+    }
+
+    select {
+      padding: 9px;
+      margin-top: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .delete {
+      background: #dc2626;
+      color: white;
+      border: 0;
+      padding: 9px 12px;
+      border-radius: 6px;
+      margin-left: 8px;
+      cursor: pointer;
+    }
+
+    @media(max-width:700px) {
+      .stats {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">🚗 Aman Car Wash — Admin</div>
+  <button class="logout" onclick="logout()">Logout</button>
+</header>
+
+<div id="loginPage" class="login">
+
+  <h2>Admin Login 🔐</h2>
+
+  <input
+    type="text"
+    id="username"
+    placeholder="Username"
+  >
+
+  <input
+    type="password"
+    id="password"
+    placeholder="Password"
+  >
+
+  <button onclick="login()">
+    Login
+  </button>
+
+</div>
+
+<div id="dashboard" class="dashboard" style="display:none;">
+
+  <h1>Dashboard 📊</h1>
+
+  <div class="stats">
+
+    <div class="stat">
+      <p>Total Bookings</p>
+      <h3 id="total">0</h3>
+    </div>
+
+    <div class="stat">
+      <p>Pending</p>
+      <h3 id="pending">0</h3>
+    </div>
+
+    <div class="stat">
+      <p>Completed</p>
+      <h3 id="completed">0</h3>
+    </div>
+
+  </div>
+
+  <h2>All Bookings</h2>
+
+  <br>
+
+  <div id="bookings" class="bookings"></div>
+
+</div>
+
+<script>
+
+function login() {
+
+  const username =
+    document.getElementById("username").value;
+
+  const password =
+    document.getElementById("password").value;
+
+  /*
+    DEMO LOGIN ONLY
+
+    Username: admin
+    Password: 1234
+  */
+
+  if (username === "admin" && password === "1234") {
+
+    localStorage.setItem("amanAdmin", "true");
+
+    showDashboard();
+
+  } else {
+
+    alert("Wrong username or password!");
+
+  }
+
+}
+
+function showDashboard() {
+
+  document.getElementById("loginPage").style.display = "none";
+
+  document.getElementById("dashboard").style.display = "block";
+
+  loadBookings();
+
+}
+
+function logout() {
+
+  localStorage.removeItem("amanAdmin");
+
+  location.reload();
+
+}
+
+function loadBookings() {
+
+  const bookings =
+    JSON.parse(localStorage.getItem("carWashBookings")) || [];
+
+  document.getElementById("total").innerText =
+    bookings.length;
+
+  document.getElementById("pending").innerText =
+    bookings.filter(b => b.status === "Pending").length;
+
+  document.getElementById("completed").innerText =
+    bookings.filter(b => b.status === "Completed").length;
+
+  const container =
+    document.getElementById("bookings");
+
+  container.innerHTML = "";
+
+  if (bookings.length === 0) {
+
+    container.innerHTML =
+      "<p>No bookings yet.</p>";
+
+    return;
+
+  }
+
+  bookings.forEach((booking, index) => {
+
+    const div = document.createElement("div");
+
+    div.className = "booking";
+
+    div.innerHTML = `
+
+      <h3>🚗 ${booking.name}</h3>
+
+      <p><strong>Mobile:</strong>
+      ${booking.phone}</p>
+
+      <p><strong>Service:</strong>
+      ${booking.service}</p>
+
+      <p><strong>Date:</strong>
+      ${booking.date}</p>
+
+      <p><strong>Time:</strong>
+      ${booking.time}</p>
+
+      <p><strong>Address:</strong>
+      ${booking.address}</p>
+
+      <p>
+        <strong>Status:</strong>
+
+        <span class="status">
+          ${booking.status}
+        </span>
+      </p>
+
+      <select
+        onchange="changeStatus(${index}, this.value)"
+      >
+
+        <option
+          ${booking.status === "Pending" ? "selected" : ""}
+        >
+          Pending
+        </option>
+
+        <option
+          ${booking.status === "Confirmed" ? "selected" : ""}
+        >
+          Confirmed
+        </option>
+
+        <option
+          ${booking.status === "Completed" ? "selected" : ""}
+        >
+          Completed
+        </option>
+
+        <option
+          ${booking.status === "Cancelled" ? "selected" : ""}
+        >
+          Cancelled
+        </option>
+
+      </select>
+
+      <button
+        class="delete"
+        onclick="deleteBooking(${index})"
+      >
+        Delete
+      </button>
+
+    `;
+
+    container.appendChild(div);
+
+  });
+
+}
+
+function changeStatus(index, status) {
+
+  const bookings =
+    JSON.parse(localStorage.getItem("carWashBookings")) || [];
+
+  bookings[index].status = status;
+
+  localStorage.setItem(
+    "carWashBookings",
+    JSON.stringify(bookings)
+  );
+
+  loadBookings();
+
+}
+
+function deleteBooking(index) {
+
+  if (!confirm("Delete this booking?")) {
+    return;
+  }
+
+  const bookings =
+    JSON.parse(localStorage.getItem("carWashBookings")) || [];
+
+  bookings.splice(index, 1);
+
+  localStorage.setItem(
+    "carWashBookings",
+    JSON.stringify(bookings)
+  );
+
+  loadBookings();
+
+}
+
+if (localStorage.getItem("amanAdmin") === "true") {
+  showDashboard();
+}
+
+</script>
+
+</body>
+</html>
